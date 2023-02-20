@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <device id="retina6_12" orientation="portrait" appearance="dark"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -40,11 +40,11 @@
                                                     </backgroundConfiguration>
                                                 </buttonConfiguration>
                                             </button>
-                                            <textField opaque="NO" alpha="0.69999999999999996" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Search" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mrx-Oh-jVP">
+                                            <textField opaque="NO" alpha="0.5" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Search" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mrx-Oh-jVP">
                                                 <rect key="frame" x="50" y="177.33333333333334" width="273" height="34"/>
                                                 <color key="tintColor" systemColor="labelColor"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                                <textInputTraits key="textInputTraits"/>
+                                                <textInputTraits key="textInputTraits" returnKeyType="search"/>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5oO-Ct-ZmY" userLabel="SearchButton">
                                                 <rect key="frame" x="333" y="174.33333333333334" width="40" height="40"/>
@@ -57,6 +57,9 @@
                                                 <buttonConfiguration key="configuration" style="plain">
                                                     <backgroundConfiguration key="background" image="magnifyingglass" catalog="system"/>
                                                 </buttonConfiguration>
+                                                <connections>
+                                                    <action selector="searchPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="0Ix-w1-BzZ"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                     </stackView>
@@ -68,8 +71,8 @@
                                             <constraint firstAttribute="height" constant="120" id="He4-iw-6Fg"/>
                                         </constraints>
                                     </imageView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="L6T-kL-bRQ">
-                                        <rect key="frame" x="220" y="528.33333333333337" width="153" height="71.666666666666629"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="L6T-kL-bRQ">
+                                        <rect key="frame" x="225" y="528.33333333333337" width="148" height="71.666666666666629"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="22" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xkg-ci-aC4">
                                                 <rect key="frame" x="0.0" y="0.0" width="73" height="71.666666666666671"/>
@@ -78,7 +81,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="°C" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0iQ-6D-0uV">
-                                                <rect key="frame" x="83" y="0.0" width="70" height="71.666666666666671"/>
+                                                <rect key="frame" x="78" y="0.0" width="70" height="71.666666666666671"/>
                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="60"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -115,6 +118,12 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ue8-UK-oxR" secondAttribute="trailing" constant="10" id="yfz-cF-lJy"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="cityLabel" destination="EcM-ok-ErJ" id="t4S-8g-q5r"/>
+                        <outlet property="conditiionImageView" destination="44A-VS-6k4" id="0Ln-kY-1zT"/>
+                        <outlet property="searchTextField" destination="Mrx-Oh-jVP" id="Nid-C7-Mub"/>
+                        <outlet property="temperatureLabel" destination="Xkg-ci-aC4" id="2ar-lB-eQy"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
