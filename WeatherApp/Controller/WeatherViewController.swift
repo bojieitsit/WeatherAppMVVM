@@ -7,20 +7,13 @@
 
 import UIKit
 
-class WeatherViewController: UIViewController, UISearchTextFieldDelegate, WeatherManagerDelegate {
-    
-    
-    
- 
+class WeatherViewController: UIViewController {
 
     @IBOutlet weak var conditiionImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var searchTextField: UITextField!
-    
     var weatherManager = WeatherManager()
-    
-    // 53b959dda234fa5c8d166885b0757232 - api key
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,11 +21,16 @@ class WeatherViewController: UIViewController, UISearchTextFieldDelegate, Weathe
         weatherManager.delegate = self
     }
     
-    
     @IBAction func searchPressed(_ sender: UIButton) {
         searchTextField.endEditing(true)
         print(searchTextField.text ?? "Empty")
     }
+
+}
+
+//MARK: - UITextFiledDelegate
+
+extension WeatherViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         searchTextField.endEditing(true)
@@ -54,10 +52,14 @@ class WeatherViewController: UIViewController, UISearchTextFieldDelegate, Weathe
         if let city = searchTextField.text {
             weatherManager.fetchWeather(cityName: city)
         }
-        
-
         searchTextField.text = ""
     }
+}
+
+//MARK: - WeatherManagerDelegate
+
+
+extension WeatherViewController: WeatherManagerDelegate {
     
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
         DispatchQueue.main.async {
@@ -65,12 +67,9 @@ class WeatherViewController: UIViewController, UISearchTextFieldDelegate, Weathe
             self.conditiionImageView.image = UIImage(systemName: weather.conditionName)
             self.cityLabel.text = weather.name
         }
-        
     }
     
     func didFailWithError(error: Error) {
         print(error)
     }
-  
 }
-
