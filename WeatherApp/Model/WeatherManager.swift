@@ -5,64 +5,88 @@
 //  Created by Andrey on 20.02.2023.
 //
 
-import Foundation
+import UIKit
 import CoreLocation
+import RxSwift
+import RxCocoa
 
-protocol WeatherManagerDelegate {
-    func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel)
-    func didFailWithError(error: Error)
+
+class WeatherViewModel: NSObject {
+    // Output
+    let temperatureText: PublishSubject<String> = PublishSubject<String>()
+    let conditionIcon: PublishSubject<String> = PublishSubject<String>()
+    let cityName: PublishSubject<String> = PublishSubject<String>()
+    
+    private let disposeBag = DisposeBag()
+    
+    
+    init(cityName: String) {
+        
+        fetchWeatherData(for: cityName)
+            .map { WeatherModel(id: $0.weather[0].id, temp: $0.main.temp, name: $0.name)  }
+            .subscribe(onNext: { [weak self] model in
+                self?.temperatureText.onNext(model.temperatureString)
+                self?.conditionIcon.onNext(model.conditionIcon)
+                self?.cityName.onNext(model.name)
+            }).disposed(by: disposeBag)
+    }
+    
+    init(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
+        fetchWeatherData(latitude: latitude, longitude: longitude)
+            .map { WeatherModel(id: $0.weather[0].id, temp: $0.main.temp, name: $0.name)  }
+            .subscribe(onNext: { [weak self] model in
+                self?.temperatureText.onNext(model.temperatureString)
+                self?.conditionIcon.onNext(model.conditionIcon)
+                self?.cityName.onNext(model.name)
+            }).disposed(by: disposeBag)
+        
+    }
+    
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        guard let location = locations.last else { return }
+//        locationManager.stopUpdatingLocation()
+//        viewModel = WeatherViewModel(latitude: location.coordinate.latitude,
+//                                     longitude: location.coordinate.longitude)
+//        bindViewModel()
+//    }
+    
+    
+    func fetchWeatherData(for city: String) -> Observable<WeatherData> {
+        let endpoint = "https://api.openweathermap.org/data/2.5/weather"
+        let appid = "53b959dda234fa5c8d166885b0757232"
+        let units = "metric"
+        guard let url = URL(string: endpoint + "?appid=" + appid + "&units=" + units + "&q=" + city) else {
+            return Observable.error(NSError(domain: "", code: -1, userInfo: nil))
+        }
+        return URLSession.shared.rx.data(request: URLRequest(url: url))
+        .map { try JSONDecoder().decode(WeatherData.self, from: $0) }    }
+    
+    func fetchWeatherData(latitude: Double, longitude: Double) -> Observable<WeatherData> {
+        
+        let endpoint = "https://api.openweathermap.org/data/2.5/weather"
+        let appid = "53b959dda234fa5c8d166885b0757232"
+        let units = "metric"
+        guard let url = URL(string: endpoint + "?appid=" + appid + "&units=" + units + "&lat=" + String(latitude) + "&lon=" + String(longitude)) else {
+            return Observable.error(NSError(domain: "", code: -1, userInfo: nil))
+        }
+        return URLSession.shared.rx.data(request: URLRequest(url: url))
+            .map { try JSONDecoder().decode(WeatherData.self, from: $0) }
+    }
+    
+    func bindViewModel() {
+        temperatureText
+            .bind(to: temperatureLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        conditionIcon
+            .map { UIImage(systemName: $0) }
+            .bind(to: conditiionImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        cityName
+            .bind(to: cityLabel.rx.text)
+            .disposed(by: disposeBag)
+    }
+    
 }
 
-struct WeatherManager {
-    let weatherURL = "https://api.openweathermap.org/data/2.5/weather?appid=53b959dda234fa5c8d166885b0757232&units=metric"
-    var delegate: WeatherManagerDelegate?
-    
-    func fetchWeather(cityName: String) {
-        let urlString = "\(weatherURL)&q=\(cityName)"
-        performRequest(with: urlString)
-    }
-    
-    func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
-        let urlString = "\(weatherURL)&lat=\(latitude)&lon=\(longitude)"
-        performRequest(with: urlString)
-    }
-    
-    func performRequest(with urlString: String) {
-        if let url = URL(string: urlString) {
-            
-            let session = URLSession(configuration: .default)
-            let task = session.dataTask(with: url) { data, response, error in
-                if error != nil {
-                    delegate?.didFailWithError(error: error!)
-                    return
-                }
-                if let safeData = data {
-                    if let weather = parseJSON(weatherData: safeData) {
-                        delegate?.didUpdateWeather(self, weather: weather)
-                    }
-                }
-            }
-            task.resume()
-        }
-    }
-    
-    func parseJSON(weatherData: Data) -> WeatherModel? {
-        let decoder = JSONDecoder()
-        do {
-            let decodedData = try decoder.decode(WeatherData.self, from: weatherData)
-            let id = decodedData.weather[0].id
-            let temp = decodedData.main.temp
-            let name = decodedData.name
-            let weather = WeatherModel(id: id, temp: temp, name: name)
-            
-            return weather
-            
-        } catch {
-            delegate?.didFailWithError(error: error)
-            return nil
-        }
-    }
-    
-   
-    
-}
