@@ -24,7 +24,6 @@ class WeatherViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         bindViewModel()
         
         locationManager = CLLocationManager()
@@ -35,6 +34,8 @@ class WeatherViewController: UIViewController {
         
         searchTextField.delegate = self
     }
+    
+    //MARK: - Flow
     
     @IBAction func searchPressed(_ sender: UIButton) {
         viewModel = WeatherViewModel(cityName: searchTextField.text ?? "")
@@ -48,36 +49,7 @@ class WeatherViewController: UIViewController {
         bindViewModel()
     }
     
-    
-    
-}
-
-//MARK: - UITextFiledDelegate
-
-extension WeatherViewController: UITextFieldDelegate {
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        searchTextField.endEditing(true)
-        print(searchTextField.text ?? "Empty")
-        return true
-    }
-    
-    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-        if textField.text != "" {
-            return true
-        } else {
-            textField.placeholder = "Type something"
-            return false
-        }
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        viewModel = WeatherViewModel(cityName: searchTextField.text ?? "")
-        bindViewModel()
-        searchTextField.endEditing(true)
-        print(searchTextField.text ?? "Empty")
-    }
-    
+    //MARK: - bindViewModel()
     
     func bindViewModel() {
         
@@ -106,8 +78,35 @@ extension WeatherViewController: UITextFieldDelegate {
             .disposed(by: disposeBag)
     }
     
-    
 }
+
+//MARK: - UITextFiledDelegate
+
+extension WeatherViewController: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        searchTextField.endEditing(true)
+        print(searchTextField.text ?? "Empty")
+        return true
+    }
+    
+    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+        if textField.text != "" {
+            return true
+        } else {
+            textField.placeholder = "Type something"
+            return false
+        }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        viewModel = WeatherViewModel(cityName: searchTextField.text ?? "")
+        bindViewModel()
+        searchTextField.endEditing(true)
+        print(searchTextField.text ?? "Empty")
+    }
+}
+
 
 //MARK: - CLLocationManagerDelegate
 

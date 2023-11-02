@@ -12,13 +12,12 @@ import RxCocoa
 
 
 class WeatherViewModel: NSObject {
-    // Output
+    
     let temperatureText: PublishSubject<String> = PublishSubject<String>()
     let conditionIcon: PublishSubject<String> = PublishSubject<String>()
     let cityName: PublishSubject<String> = PublishSubject<String>()
     
     private let disposeBag = DisposeBag()
-    
     
     init(cityName: String) {
         super.init()
@@ -45,6 +44,7 @@ class WeatherViewModel: NSObject {
         
     }
     
+    //MARK: - fetchData (city)
     
     func fetchWeatherData(for city: String) -> Observable<WeatherData> {
 
@@ -62,6 +62,8 @@ class WeatherViewModel: NSObject {
             }
     }
     
+    //MARK: - fetchData (coordinates)
+    
     func fetchWeatherData(latitude: Double, longitude: Double) -> Observable<WeatherData> {
         
         guard let url = URL(string: Constants.ServerConstants.endpoint + "?appid=" + Constants.ServerConstants.appid + "&units=" + Constants.ServerConstants.units + "&lat=" + String(latitude) + "&lon=" + String(longitude)) else {
@@ -78,8 +80,6 @@ class WeatherViewModel: NSObject {
                 }
             }
     }
-    
-    
     
 }
 
