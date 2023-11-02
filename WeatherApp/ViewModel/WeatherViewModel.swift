@@ -2,7 +2,7 @@
 //  WeatherManager.swift
 //  WeatherApp
 //
-//  Created by Andrey on 20.02.2023.
+//  Created by Andrei Bogoslovskii on 02.11.2023.
 //
 
 import UIKit
@@ -21,6 +21,7 @@ class WeatherViewModel: NSObject {
     
     
     init(cityName: String) {
+        super.init()
         
         fetchWeatherData(for: cityName)
             .map { WeatherModel(id: $0.weather[0].id, temp: $0.main.temp, name: $0.name)  }
@@ -32,6 +33,8 @@ class WeatherViewModel: NSObject {
     }
     
     init(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
+        super.init()
+        
         fetchWeatherData(latitude: latitude, longitude: longitude)
             .map { WeatherModel(id: $0.weather[0].id, temp: $0.main.temp, name: $0.name)  }
             .subscribe(onNext: { [weak self] model in
@@ -42,51 +45,41 @@ class WeatherViewModel: NSObject {
         
     }
     
-//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        guard let location = locations.last else { return }
-//        locationManager.stopUpdatingLocation()
-//        viewModel = WeatherViewModel(latitude: location.coordinate.latitude,
-//                                     longitude: location.coordinate.longitude)
-//        bindViewModel()
-//    }
-    
     
     func fetchWeatherData(for city: String) -> Observable<WeatherData> {
-        let endpoint = "https://api.openweathermap.org/data/2.5/weather"
-        let appid = "53b959dda234fa5c8d166885b0757232"
-        let units = "metric"
-        guard let url = URL(string: endpoint + "?appid=" + appid + "&units=" + units + "&q=" + city) else {
+
+        guard let url = URL(string: Constants.ServerConstants.endpoint + "?appid=" + Constants.ServerConstants.appid + "&units=" + Constants.ServerConstants.units + "&q=" + city) else {
             return Observable.error(NSError(domain: "", code: -1, userInfo: nil))
         }
         return URLSession.shared.rx.data(request: URLRequest(url: url))
-        .map { try JSONDecoder().decode(WeatherData.self, from: $0) }    }
+            .flatMap { data -> Observable<WeatherData> in
+                do {
+                    let weatherData = try JSONDecoder().decode(WeatherData.self, from: data)
+                    return Observable.just(weatherData)
+                } catch let error {
+                    return Observable.error(error)
+                }
+            }
+    }
     
     func fetchWeatherData(latitude: Double, longitude: Double) -> Observable<WeatherData> {
         
-        let endpoint = "https://api.openweathermap.org/data/2.5/weather"
-        let appid = "53b959dda234fa5c8d166885b0757232"
-        let units = "metric"
-        guard let url = URL(string: endpoint + "?appid=" + appid + "&units=" + units + "&lat=" + String(latitude) + "&lon=" + String(longitude)) else {
+        guard let url = URL(string: Constants.ServerConstants.endpoint + "?appid=" + Constants.ServerConstants.appid + "&units=" + Constants.ServerConstants.units + "&lat=" + String(latitude) + "&lon=" + String(longitude)) else {
             return Observable.error(NSError(domain: "", code: -1, userInfo: nil))
         }
         return URLSession.shared.rx.data(request: URLRequest(url: url))
-            .map { try JSONDecoder().decode(WeatherData.self, from: $0) }
+            .flatMap { data -> Observable<WeatherData> in
+                do {
+                    let weatherData = try JSONDecoder().decode(WeatherData.self, from: data)
+                    return Observable.just(weatherData)
+                }
+                catch let error {
+                    return Observable.error(error)
+                }
+            }
     }
     
-    func bindViewModel() {
-        temperatureText
-            .bind(to: temperatureLabel.rx.text)
-            .disposed(by: disposeBag)
-        
-        conditionIcon
-            .map { UIImage(systemName: $0) }
-            .bind(to: conditiionImageView.rx.image)
-            .disposed(by: disposeBag)
-        
-        cityName
-            .bind(to: cityLabel.rx.text)
-            .disposed(by: disposeBag)
-    }
+    
     
 }
 

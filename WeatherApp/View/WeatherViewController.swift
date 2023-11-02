@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  WeatherApp
 //
-//  Created by Andrey on 16.02.2023.
+//  Created by Andrei Bogoslovskii on 02.11.2023.
 //
 
 import UIKit
@@ -10,7 +10,7 @@ import CoreLocation
 import RxSwift
 import RxCocoa
 
-class WeatherViewController: UIViewController, CLLocationManagerDelegate {
+class WeatherViewController: UIViewController {
     
     @IBOutlet weak var conditiionImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
@@ -18,11 +18,13 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var searchTextField: UITextField!
     
     var locationManager: CLLocationManager!
-    var viewModel: WeatherViewModel!
+    var viewModel: WeatherViewModel?
     var disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
         bindViewModel()
         
         locationManager = CLLocationManager()
@@ -43,19 +45,11 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     
     @IBAction func locationPressed(_ sender: UIButton) {
         locationManager.requestLocation()
+        bindViewModel()
     }
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let location = locations.last {
-            viewModel.fetchWeatherData(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
-        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        // обработка ошибки
-        print(error)
-    }
-
+    
+    
 }
 
 //MARK: - UITextFiledDelegate
@@ -78,12 +72,24 @@ extension WeatherViewController: UITextFieldDelegate {
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
+        viewModel = WeatherViewModel(cityName: searchTextField.text ?? "")
         bindViewModel()
-        searchTextField.text = ""
+        searchTextField.endEditing(true)
+        print(searchTextField.text ?? "Empty")
     }
     
     
-    private func bindViewModel() {
+    func bindViewModel() {
+        
+        guard let viewModel = viewModel else {
+            return
+        }
+        
+        guard let temperatureLabel = self.temperatureLabel,
+              let conditiionImageView = self.conditiionImageView,
+              let cityLabel = self.cityLabel
+        else { return }
+        
         disposeBag = DisposeBag()
         
         viewModel.temperatureText
@@ -101,5 +107,36 @@ extension WeatherViewController: UITextFieldDelegate {
     }
     
     
+}
+
+//MARK: - CLLocationManagerDelegate
+
+extension WeatherViewController: CLLocationManagerDelegate {
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            locationManager.stopUpdatingLocation()
+            // Создаем новый экземпляр viewModel с полученными координатами местоположения
+            viewModel = WeatherViewModel(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+            bindViewModel()
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Произошла ошибка при получении геолокации: \(error)")
+        
+        let alertController = UIAlertController(title: "Ошибка геолокации", message: error.localizedDescription, preferredStyle: .alert)
+        
+        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        let retryAction = UIAlertAction(title: "Попробовать еще раз", style: .default) { [weak self] _ in
+            self?.locationManager.requestLocation()
+            self?.bindViewModel()
+        }
+        alertController.addAction(retryAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
 }
 

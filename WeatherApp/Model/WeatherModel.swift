@@ -2,7 +2,7 @@
 //  WeatherModel.swift
 //  WeatherApp
 //
-//  Created by Andrey on 20.02.2023.
+//  Created by Andrei Bogoslovskii on 02.11.2023.
 //
 
 import Foundation
